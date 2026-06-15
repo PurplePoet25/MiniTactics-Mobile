@@ -6,7 +6,7 @@ source.dir = .
 source.include_exts = py,png,md,txt
 source.exclude_dirs = __pycache__,.git,tests,.pytest_cache
 version = 1.0.0
-requirements = python3==3.11.6,pygame
+requirements = hostpython3==3.11.6,python3==3.11.6,pygame
 orientation = portrait
 fullscreen = 1
 android.permissions = VIBRATE
