@@ -1,39 +1,30 @@
-"""Android/GitHub Actions launcher for MiniTactics Pocket Warboard.
+"""Buildozer/Android launcher for MiniTactics Pocket Warboard.
 
-This root-level launcher exists because Buildozer expects a ``main.py`` at
-``source.dir``. The actual game lives in ``minitactics_duel/main.py``.
-
-Do not use ``from main import main`` here: when this file is executed as the
-root app entry point, Python may resolve ``main`` back to this same launcher.
-We load the real game module from its file path instead.
+Buildozer may package source files as .pyc inside the APK. A file-path loader
+that points at minitactics_duel/main.py can fail on Android when the .py file is
+not present. Use normal module importing instead; Python can load the packaged
+.pyc modules correctly.
 """
 from __future__ import annotations
 
-import importlib.util
+import importlib
+import os
 import sys
-from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parent
-GAME_DIR = ROOT_DIR / "minitactics_duel"
-GAME_MAIN = GAME_DIR / "main.py"
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+GAME_DIR = os.path.join(ROOT_DIR, "minitactics_duel")
 
-# The original MiniTactics source uses imports like ``from config import ...``.
-# Keeping the game directory first preserves that existing logic unchanged.
-if str(GAME_DIR) not in sys.path:
-    sys.path.insert(0, str(GAME_DIR))
-
-
-def _load_game_main():
-    spec = importlib.util.spec_from_file_location("minitactics_duel_entry", GAME_MAIN)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Could not load game entry point: {GAME_MAIN}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.main
+# The original game modules use absolute imports like `from config import ...`.
+# Put the game folder first so those imports resolve on desktop and Android.
+if GAME_DIR not in sys.path:
+    sys.path.insert(0, GAME_DIR)
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 
 
 def main() -> None:
-    _load_game_main()()
+    game_module = importlib.import_module("minitactics_duel.main")
+    game_module.main()
 
 
 if __name__ == "__main__":

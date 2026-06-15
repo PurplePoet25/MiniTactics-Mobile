@@ -23,12 +23,24 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
+          sudo apt-get install -y \
+            git \
+            zip \
+            unzip \
+            autoconf \
+            libtool \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            cmake \
+            libffi-dev \
+            libssl-dev
 
       - name: Install Buildozer
         run: |
@@ -40,7 +52,6 @@ jobs:
           rm -rf .buildozer bin
 
       - name: Build APK
-        continue-on-error: true
         run: |
           set -o pipefail
           yes | buildozer android debug 2>&1 | tee buildozer_full_log.txt
@@ -53,10 +64,8 @@ jobs:
           path: buildozer_full_log.txt
 
       - name: Upload APK artifact
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: MiniTactics-Pocket-Warboard-APK
-          path: |
-            bin/*.apk
-            ./**/*.apk
+          path: bin/*.apk
