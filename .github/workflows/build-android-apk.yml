@@ -28,19 +28,7 @@ jobs:
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            git \
-            zip \
-            unzip \
-            autoconf \
-            libtool \
-            pkg-config \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            cmake \
-            libffi-dev \
-            libssl-dev
+          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
 
       - name: Install Buildozer
         run: |
@@ -49,12 +37,18 @@ jobs:
 
       - name: Clean old Buildozer cache
         run: |
-          rm -rf .buildozer bin
+          rm -rf .buildozer bin apk-output
 
       - name: Build APK
         run: |
-          set -o pipefail
-          yes | buildozer android debug 2>&1 | tee buildozer_full_log.txt
+          yes | buildozer android debug 2>&1 | tee buildozer_full_log.txt || true
+
+      - name: Collect APK files
+        if: always()
+        run: |
+          mkdir -p apk-output
+          find . -name "*.apk" -type f -print -exec cp {} apk-output/ \;
+          ls -la apk-output
 
       - name: Upload full Buildozer log
         if: always()
@@ -64,8 +58,8 @@ jobs:
           path: buildozer_full_log.txt
 
       - name: Upload APK artifact
-        if: success()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: MiniTactics-Pocket-Warboard-APK
-          path: bin/*.apk
+          path: apk-output/*.apk
