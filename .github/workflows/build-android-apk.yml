@@ -1,37 +1,27 @@
 name: Build Android APK
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
+workflow_dispatch:
+push:
+branches: [ main ]
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+build:
+runs-on: ubuntu-22.04
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+```
+steps:
+  - name: Check out repository
+    uses: actions/checkout@v4
 
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+  - name: Build with Buildozer
+    uses: ArtemSBulgakov/buildozer-action@v1
+    with:
+      command: buildozer android debug
 
-      - name: Install Buildozer
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install buildozer cython
-
-      - name: Build APK
-        run: buildozer android debug
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: MiniTactics-Pocket-Warboard-APK
-          path: bin/*.apk
+  - name: Upload APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: MiniTactics-APK
+      path: bin/*.apk
+```
